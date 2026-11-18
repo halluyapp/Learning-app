@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">LingoLume</string>
+    <string name="title_activity_main">LingoLume</string>
+    <string name="package_name">com.lingolume.app</string>
+    <string name="custom_url_scheme">com.lingolume.app</string>
+</resources>

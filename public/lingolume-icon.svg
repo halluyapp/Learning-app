@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="bg" cx="42%" cy="30%" r="78%">
+      <stop offset="0" stop-color="#1c6179"/>
+      <stop offset="0.42" stop-color="#0d2a42"/>
+      <stop offset="1" stop-color="#06121f"/>
+    </radialGradient>
+    <radialGradient id="core" cx="35%" cy="25%" r="75%">
+      <stop offset="0" stop-color="#f1ffff"/>
+      <stop offset="0.2" stop-color="#a7f5f4"/>
+      <stop offset="0.55" stop-color="#5bd6e1"/>
+      <stop offset="1" stop-color="#1c7d96"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" rx="124" fill="#06121f"/>
+  <circle cx="256" cy="256" r="174" fill="url(#bg)" stroke="#4dcbd8" stroke-opacity=".32" stroke-width="4"/>
+  <ellipse cx="256" cy="256" rx="145" ry="62" fill="none" stroke="#c9ffff" stroke-opacity=".86" stroke-width="7" transform="rotate(35 256 256)"/>
+  <ellipse cx="256" cy="256" rx="96" ry="143" fill="none" stroke="#c9ffff" stroke-opacity=".5" stroke-width="6" transform="rotate(-38 256 256)"/>
+  <circle cx="256" cy="256" r="72" fill="url(#core)"/>
+  <circle cx="234" cy="232" r="15" fill="#f1ffff"/>
+  <circle cx="234" cy="232" r="25" fill="none" stroke="#f1ffff" stroke-opacity=".25" stroke-width="5"/>
+</svg>
