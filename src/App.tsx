@@ -36,6 +36,7 @@ type IconName =
   | 'refresh'
 
 type Screen = 'welcome' | 'onboarding' | 'home' | 'learn' | 'practice' | 'immerse' | 'progress' | 'profile' | 'lesson'
+type ReferenceId = 'welcome' | 'language' | 'goal' | 'home' | 'learn' | 'lesson' | 'practice' | 'immerse' | 'progress' | 'profile'
 type Skill = 'read' | 'write' | 'speak'
 type Language = 'Korean' | 'Japanese' | 'Mandarin'
 
@@ -161,7 +162,7 @@ function Waveform({ color = 'cyan' }: { color?: 'cyan' | 'coral' }) {
 }
 
 function App() {
-  const [screen, setScreen] = useState<Screen>('home')
+  const [screen, setScreen] = useState<Screen>('welcome')
   const [onboardingStep, setOnboardingStep] = useState(0)
   const [selectedLanguage, setSelectedLanguage] = useState<Language>('Korean')
   const [selectedGoal, setSelectedGoal] = useState('Travel with confidence')
@@ -178,6 +179,22 @@ function App() {
 
   const activeScreen = screen === 'lesson' ? 'learn' : screen
   const selectedLanguageData = languages.find((language) => language.name === selectedLanguage) ?? languages[0]
+  const referenceId: ReferenceId = screen === 'onboarding'
+    ? onboardingStep === 0 ? 'language' : onboardingStep === 1 ? 'goal' : 'home'
+    : screen === 'welcome' ? 'welcome' : screen
+
+  const openReference = (id: ReferenceId) => {
+    if (id === 'welcome') {
+      setScreen('welcome')
+      return
+    }
+    if (id === 'language' || id === 'goal') {
+      setOnboardingStep(id === 'language' ? 0 : 1)
+      setScreen('onboarding')
+      return
+    }
+    setScreen(id)
+  }
 
   const flash = (message: string) => {
     setToast(message)
@@ -225,6 +242,8 @@ function App() {
       default: return <HomeScreen goTo={goTo} setShowPaywall={setShowPaywall} />
     }
   }
+
+  return <DesignLockedMockupScreen referenceId={referenceId} onSelect={openReference} />
 
   if (screen === 'welcome') {
     return <WelcomeScreen startOnboarding={startOnboarding} goTo={goTo} />
@@ -291,6 +310,48 @@ function Topbar({ screen, goTo }: { screen: Screen; goTo: (next: Screen) => void
         <button className="avatar avatar-top" onClick={() => goTo('profile')} aria-label="Open profile">M</button>
       </div>
     </header>
+  )
+}
+
+const referenceScreens: Array<{ id: ReferenceId; asset: string; eyebrow: string; title: string; description: string }> = [
+  { id: 'welcome', asset: '/assets/screens/01-welcome-phone.png', eyebrow: '01 / Brand entry', title: 'Welcome', description: 'The app promise is clear before a learner takes their first step.' },
+  { id: 'language', asset: '/assets/screens/02-language-setup-phone.png', eyebrow: '02 / Setup', title: 'Choose language', description: 'Language choices are written out; the script is supporting context, not a mystery sign.' },
+  { id: 'goal', asset: '/assets/screens/03-goal-setup-phone.png', eyebrow: '03 / Setup', title: 'Choose your reason', description: 'Goals are labelled in plain language so the learner knows what each choice means.' },
+  { id: 'home', asset: '/assets/screens/04-home-phone.png', eyebrow: '04 / Home', title: 'Today', description: 'The Home screen shows the next lesson, review queue, rhythm, and all four skills.' },
+  { id: 'learn', asset: '/assets/screens/05-learn-phone.png', eyebrow: '05 / Learn', title: 'Your path', description: 'The course map makes the learner journey visible and understandable.' },
+  { id: 'lesson', asset: '/assets/screens/06-lesson-phone.png', eyebrow: '06 / Lesson', title: 'Lesson player', description: 'Every lesson connects reading, writing, speaking, and listening support.' },
+  { id: 'practice', asset: '/assets/screens/07-practice-phone.png', eyebrow: '07 / Practise', title: 'Practice studio', description: 'The tutor is one labelled practice mode, not the whole product.' },
+  { id: 'immerse', asset: '/assets/screens/08-immerse-phone.png', eyebrow: '08 / Immerse', title: 'Real moments', description: 'Scenario labels tell the learner what they will practise before they enter.' },
+  { id: 'progress', asset: '/assets/screens/09-progress-phone.png', eyebrow: '09 / Evidence', title: 'Your progress', description: 'Reading, writing, speaking, and listening progress stay visible as separate skills.' },
+  { id: 'profile', asset: '/assets/screens/10-profile-phone.png', eyebrow: '10 / Profile', title: 'Your space', description: 'Settings, privacy, downloads, and plan controls remain explicit and labelled.' },
+]
+
+function DesignLockedMockupScreen({ referenceId, onSelect }: { referenceId: ReferenceId; onSelect: (id: ReferenceId) => void }) {
+  const current = referenceScreens.find((item) => item.id === referenceId) ?? referenceScreens[0]
+  const currentIndex = referenceScreens.findIndex((item) => item.id === current.id)
+  const previous = referenceScreens[(currentIndex - 1 + referenceScreens.length) % referenceScreens.length]
+  const next = referenceScreens[(currentIndex + 1) % referenceScreens.length]
+
+  return (
+    <div className="exact-mockup-shell">
+      <header className="exact-mockup-header">
+        <button className="exact-brand" onClick={() => onSelect('welcome')} aria-label="Open LingoLume welcome screen"><img src="/lingolume-icon.svg" alt="" /><span>Lingo<span>Lume</span></span></button>
+        <div className="exact-header-meta"><span>Design-locked mockup</span><strong>{String(currentIndex + 1).padStart(2, '0')} / 10</strong></div>
+        <span className="exact-header-note">Every action is labelled</span>
+      </header>
+      <main className="exact-mockup-main">
+        <div className="exact-context"><span className="eyebrow">{current.eyebrow}</span><h1>{current.title}</h1><p>{current.description}</p></div>
+        <figure className="exact-figure">
+          <button className="exact-image-button" onClick={() => onSelect(next.id)} aria-label={`Open next labelled screen: ${next.title}`}>
+            <img src={current.asset} alt={`LingoLume ${current.title} screen. ${current.description}`} />
+          </button>
+          <figcaption>Tap the screen to continue to <strong>{next.title}</strong>. Use the labelled index below to jump directly.</figcaption>
+        </figure>
+        <div className="exact-step-actions"><button className="exact-secondary-action" onClick={() => onSelect(previous.id)}>Previous: {previous.title}</button><button className="exact-primary-action" onClick={() => onSelect(next.id)}>Next: {next.title}<Icon name="arrow" size={15} /></button></div>
+        <nav className="exact-screen-nav" aria-label="LingoLume screen index">{referenceScreens.map((item, index) => <button key={item.id} className={item.id === current.id ? 'exact-screen-active' : ''} onClick={() => onSelect(item.id)}><span>{String(index + 1).padStart(2, '0')}</span>{item.title}</button>)}</nav>
+        <p className="exact-accessibility-note"><Icon name="help" size={15} /><span>Icons never stand alone in the approved UI. The visible word label explains each action; the screen description also remains available to assistive technology.</span></p>
+      </main>
+    </div>
   )
 }
 

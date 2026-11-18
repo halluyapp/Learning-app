@@ -25,7 +25,7 @@ The first build is intentionally a **front-end product mockup**. It uses realist
 
 ## 3. Design lock
 
-The phone mockups are the visual source of truth. The interactive experience must remain one coherent product:
+The phone mockups are the visual source of truth. The interactive review experience uses those approved screen assets directly so the implementation cannot drift into a different layout. The interactive experience must remain one coherent product:
 
 - Midnight navy foundation.
 - Luminous cyan and ice-blue light.
