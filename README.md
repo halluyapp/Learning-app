@@ -7,8 +7,8 @@ The experience is designed to teach reading, writing, speaking, and supporting l
 ## Included
 
 - Locked midnight, cyan, and coral-gold LingoLume visual system.
-- Welcome and onboarding journey.
-- Home dashboard with a balanced Read / Write / Speak plan.
+- Welcome and onboarding journey rendered as real UI components inside the approved phone proportions.
+- Home dashboard with a balanced Read / Write / Speak plan matching the approved screen composition.
 - Learn course map.
 - Lesson player with reading, writing, and speaking states.
 - Practice studio and tutor placeholder.

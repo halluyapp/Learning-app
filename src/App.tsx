@@ -36,7 +36,6 @@ type IconName =
   | 'refresh'
 
 type Screen = 'welcome' | 'onboarding' | 'home' | 'learn' | 'practice' | 'immerse' | 'progress' | 'profile' | 'lesson'
-type ReferenceId = 'welcome' | 'language' | 'goal' | 'home' | 'learn' | 'lesson' | 'practice' | 'immerse' | 'progress' | 'profile'
 type Skill = 'read' | 'write' | 'speak'
 type Language = 'Korean' | 'Japanese' | 'Mandarin'
 
@@ -177,24 +176,7 @@ function App() {
     document.title = `LingoLume — ${screenTitles[screen]}`
   }, [screen])
 
-  const activeScreen = screen === 'lesson' ? 'learn' : screen
   const selectedLanguageData = languages.find((language) => language.name === selectedLanguage) ?? languages[0]
-  const referenceId: ReferenceId = screen === 'onboarding'
-    ? onboardingStep === 0 ? 'language' : onboardingStep === 1 ? 'goal' : 'home'
-    : screen === 'welcome' ? 'welcome' : screen
-
-  const openReference = (id: ReferenceId) => {
-    if (id === 'welcome') {
-      setScreen('welcome')
-      return
-    }
-    if (id === 'language' || id === 'goal') {
-      setOnboardingStep(id === 'language' ? 0 : 1)
-      setScreen('onboarding')
-      return
-    }
-    setScreen(id)
-  }
 
   const flash = (message: string) => {
     setToast(message)
@@ -243,28 +225,7 @@ function App() {
     }
   }
 
-  return <DesignLockedMockupScreen referenceId={referenceId} onSelect={openReference} />
-
-  if (screen === 'welcome') {
-    return <WelcomeScreen startOnboarding={startOnboarding} goTo={goTo} />
-  }
-
-  if (screen === 'onboarding') {
-    return <OnboardingScreen step={onboardingStep} selectedLanguage={selectedLanguage} setSelectedLanguage={setSelectedLanguage} selectedGoal={selectedGoal} setSelectedGoal={setSelectedGoal} dailyMinutes={dailyMinutes} setDailyMinutes={setDailyMinutes} selectedLanguageData={selectedLanguageData} continueOnboarding={continueOnboarding} goTo={goTo} />
-  }
-
-  return (
-    <div className="app-shell">
-      <Sidebar activeScreen={activeScreen as Exclude<Screen, 'welcome' | 'onboarding' | 'lesson'>} goTo={goTo} />
-      <div className="app-stage">
-        <Topbar screen={screen} goTo={goTo} />
-        <main className="content-area">{renderScreen()}</main>
-        <MobileNav activeScreen={activeScreen as Exclude<Screen, 'welcome' | 'onboarding' | 'lesson'>} goTo={goTo} />
-      </div>
-      {showPaywall && <PaywallModal close={() => setShowPaywall(false)} />}
-      {toast && <div className="toast"><span className="toast-icon"><Icon name="check" size={15} /></span>{toast}</div>}
-    </div>
-  )
+  return <RealPhoneShell screen={screen} onboardingStep={onboardingStep} selectedLanguage={selectedLanguage} setSelectedLanguage={setSelectedLanguage} selectedGoal={selectedGoal} setSelectedGoal={setSelectedGoal} dailyMinutes={dailyMinutes} setDailyMinutes={setDailyMinutes} selectedLanguageData={selectedLanguageData} continueOnboarding={continueOnboarding} goTo={goTo} startOnboarding={startOnboarding} exerciseMode={exerciseMode} setExerciseMode={setExerciseMode} lessonAnswer={lessonAnswer} answerLesson={answerLesson} lessonComplete={lessonComplete} setLessonComplete={setLessonComplete} showPaywall={showPaywall} setShowPaywall={setShowPaywall} flash={flash} toast={toast} />
 }
 
 function Sidebar({ activeScreen, goTo }: { activeScreen: Exclude<Screen, 'welcome' | 'onboarding' | 'lesson'>; goTo: (next: Screen) => void }) {
@@ -313,46 +274,121 @@ function Topbar({ screen, goTo }: { screen: Screen; goTo: (next: Screen) => void
   )
 }
 
-const referenceScreens: Array<{ id: ReferenceId; asset: string; eyebrow: string; title: string; description: string }> = [
-  { id: 'welcome', asset: '/assets/screens/01-welcome-phone.png', eyebrow: '01 / Brand entry', title: 'Welcome', description: 'The app promise is clear before a learner takes their first step.' },
-  { id: 'language', asset: '/assets/screens/02-language-setup-phone.png', eyebrow: '02 / Setup', title: 'Choose language', description: 'Language choices are written out; the script is supporting context, not a mystery sign.' },
-  { id: 'goal', asset: '/assets/screens/03-goal-setup-phone.png', eyebrow: '03 / Setup', title: 'Choose your reason', description: 'Goals are labelled in plain language so the learner knows what each choice means.' },
-  { id: 'home', asset: '/assets/screens/04-home-phone.png', eyebrow: '04 / Home', title: 'Today', description: 'The Home screen shows the next lesson, review queue, rhythm, and all four skills.' },
-  { id: 'learn', asset: '/assets/screens/05-learn-phone.png', eyebrow: '05 / Learn', title: 'Your path', description: 'The course map makes the learner journey visible and understandable.' },
-  { id: 'lesson', asset: '/assets/screens/06-lesson-phone.png', eyebrow: '06 / Lesson', title: 'Lesson player', description: 'Every lesson connects reading, writing, speaking, and listening support.' },
-  { id: 'practice', asset: '/assets/screens/07-practice-phone.png', eyebrow: '07 / Practise', title: 'Practice studio', description: 'The tutor is one labelled practice mode, not the whole product.' },
-  { id: 'immerse', asset: '/assets/screens/08-immerse-phone.png', eyebrow: '08 / Immerse', title: 'Real moments', description: 'Scenario labels tell the learner what they will practise before they enter.' },
-  { id: 'progress', asset: '/assets/screens/09-progress-phone.png', eyebrow: '09 / Evidence', title: 'Your progress', description: 'Reading, writing, speaking, and listening progress stay visible as separate skills.' },
-  { id: 'profile', asset: '/assets/screens/10-profile-phone.png', eyebrow: '10 / Profile', title: 'Your space', description: 'Settings, privacy, downloads, and plan controls remain explicit and labelled.' },
-]
+type RealPhoneShellProps = {
+  screen: Screen
+  onboardingStep: number
+  selectedLanguage: Language
+  setSelectedLanguage: (language: Language) => void
+  selectedGoal: string
+  setSelectedGoal: (goal: string) => void
+  dailyMinutes: string
+  setDailyMinutes: (minutes: string) => void
+  selectedLanguageData: typeof languages[number]
+  continueOnboarding: () => void
+  goTo: (next: Screen) => void
+  startOnboarding: () => void
+  exerciseMode: Skill
+  setExerciseMode: (skill: Skill) => void
+  lessonAnswer: string | null
+  answerLesson: (answer: string) => void
+  lessonComplete: boolean
+  setLessonComplete: (complete: boolean) => void
+  showPaywall: boolean
+  setShowPaywall: (value: boolean) => void
+  flash: (message: string) => void
+  toast: string
+}
 
-function DesignLockedMockupScreen({ referenceId, onSelect }: { referenceId: ReferenceId; onSelect: (id: ReferenceId) => void }) {
-  const current = referenceScreens.find((item) => item.id === referenceId) ?? referenceScreens[0]
-  const currentIndex = referenceScreens.findIndex((item) => item.id === current.id)
-  const previous = referenceScreens[(currentIndex - 1 + referenceScreens.length) % referenceScreens.length]
-  const next = referenceScreens[(currentIndex + 1) % referenceScreens.length]
+function RealPhoneShell(props: RealPhoneShellProps) {
+  const { screen, goTo, showPaywall, setShowPaywall, toast } = props
+  const primary = screen === 'lesson' ? 'learn' : screen
+  const screenContent = screen === 'welcome' ? <RealWelcome onStart={props.startOnboarding} onDemo={() => goTo('home')} />
+    : screen === 'onboarding' ? <RealOnboarding {...props} />
+      : screen === 'home' ? <RealHome goTo={goTo} />
+        : screen === 'learn' ? <RealLearn {...props} />
+          : screen === 'lesson' ? <RealLesson {...props} />
+            : screen === 'practice' ? <RealPractice {...props} />
+              : screen === 'immerse' ? <RealImmerse {...props} />
+                : screen === 'progress' ? <RealProgress />
+                  : <RealProfile {...props} />
 
-  return (
-    <div className="exact-mockup-shell">
-      <header className="exact-mockup-header">
-        <button className="exact-brand" onClick={() => onSelect('welcome')} aria-label="Open LingoLume welcome screen"><img src="/lingolume-icon.svg" alt="" /><span>Lingo<span>Lume</span></span></button>
-        <div className="exact-header-meta"><span>Design-locked mockup</span><strong>{String(currentIndex + 1).padStart(2, '0')} / 10</strong></div>
-        <span className="exact-header-note">Every action is labelled</span>
-      </header>
-      <main className="exact-mockup-main">
-        <div className="exact-context"><span className="eyebrow">{current.eyebrow}</span><h1>{current.title}</h1><p>{current.description}</p></div>
-        <figure className="exact-figure">
-          <button className="exact-image-button" onClick={() => onSelect(next.id)} aria-label={`Open next labelled screen: ${next.title}`}>
-            <img src={current.asset} alt={`LingoLume ${current.title} screen. ${current.description}`} />
-          </button>
-          <figcaption>Tap the screen to continue to <strong>{next.title}</strong>. Use the labelled index below to jump directly.</figcaption>
-        </figure>
-        <div className="exact-step-actions"><button className="exact-secondary-action" onClick={() => onSelect(previous.id)}>Previous: {previous.title}</button><button className="exact-primary-action" onClick={() => onSelect(next.id)}>Next: {next.title}<Icon name="arrow" size={15} /></button></div>
-        <nav className="exact-screen-nav" aria-label="LingoLume screen index">{referenceScreens.map((item, index) => <button key={item.id} className={item.id === current.id ? 'exact-screen-active' : ''} onClick={() => onSelect(item.id)}><span>{String(index + 1).padStart(2, '0')}</span>{item.title}</button>)}</nav>
-        <p className="exact-accessibility-note"><Icon name="help" size={15} /><span>Icons never stand alone in the approved UI. The visible word label explains each action; the screen description also remains available to assistive technology.</span></p>
-      </main>
+  return <div className="real-preview-stage">
+    <div className="real-preview-label"><span>LingoLume / Live interface</span><strong>{screen === 'welcome' ? 'Welcome' : screen === 'onboarding' ? 'Personalise your path' : screenTitles[screen]}</strong><small>Real UI · Design locked</small></div>
+    <div className={`real-device ${screen === 'welcome' || screen === 'onboarding' ? 'real-device-entry' : ''}`}>
+      <div className="real-device-notch" aria-hidden="true" />
+      <div className="real-device-screen">
+        {screenContent}
+        {screen !== 'welcome' && screen !== 'onboarding' && <RealBottomNav active={primary as Exclude<Screen, 'welcome' | 'onboarding' | 'lesson'>} goTo={goTo} />}
+        {showPaywall && <RealPlusModal close={() => setShowPaywall(false)} />}
+        {toast && <div className="real-toast"><span><Icon name="check" size={13} /></span>{toast}</div>}
+      </div>
     </div>
-  )
+    <p className="real-preview-foot">This is the real interface layer, not a mockup image. Every icon has a visible label or an accessible explanation.</p>
+  </div>
+}
+
+function RealBrand({ compact = false }: { compact?: boolean }) {
+  return <span className={`real-brand ${compact ? 'real-brand-compact' : ''}`}><img src="/lingolume-icon.svg" alt="" /><span>Lingo<span>Lume</span></span></span>
+}
+
+function RealAppHeader({ title, goTo, back = false }: { title: string; goTo: (next: Screen) => void; back?: boolean }) {
+  return <header className="real-app-header">{back ? <button className="real-back-button" onClick={() => goTo('home')} aria-label="Back to Home"><Icon name="back" size={17} /></button> : <RealBrand compact />}<div className="real-header-title">{title}</div><button className="real-profile-chip" onClick={() => goTo('profile')} aria-label="Open Profile"><span>M</span><small>Profile</small></button></header>
+}
+
+function RealBottomNav({ active, goTo }: { active: Exclude<Screen, 'welcome' | 'onboarding' | 'lesson'>; goTo: (next: Screen) => void }) {
+  const items: Array<{ id: Exclude<Screen, 'welcome' | 'onboarding' | 'lesson'>; label: string; icon: IconName }> = [
+    { id: 'home', label: 'Home', icon: 'home' },
+    { id: 'learn', label: 'Learn', icon: 'book' },
+    { id: 'practice', label: 'Practise', icon: 'mic' },
+    { id: 'immerse', label: 'Immerse', icon: 'compass' },
+    { id: 'profile', label: 'Profile', icon: 'user' },
+  ]
+  return <nav className="real-bottom-nav" aria-label="Main navigation">{items.map((item) => <button key={item.id} className={active === item.id ? 'real-nav-active' : ''} onClick={() => goTo(item.id)}><Icon name={item.icon} size={17} /><span>{item.label}</span></button>)}</nav>
+}
+
+function RealWelcome({ onStart, onDemo }: { onStart: () => void; onDemo: () => void }) {
+  return <section className="real-welcome"><div className="real-welcome-light" /><img className="real-welcome-icon" src="/lingolume-icon.svg" alt="LingoLume app icon" /><h1>Lingo<span>Lume</span></h1><p>Learn the language.<br />Step into its world.</p><button className="real-coral-button real-welcome-cta" onClick={onStart}>Begin your journey</button><button className="real-text-link" onClick={onDemo}>Open the demo</button><small className="real-welcome-note">Read · Write · Speak</small></section>
+}
+
+function RealOnboarding({ onboardingStep, selectedLanguage, setSelectedLanguage, selectedGoal, setSelectedGoal, dailyMinutes, setDailyMinutes, selectedLanguageData, continueOnboarding, goTo }: RealPhoneShellProps) {
+  const steps = ['Language', 'Goal', 'Routine', 'Ready']
+  const goals = ['Travel with confidence', 'Culture and curiosity', 'Study or career', 'Everyday conversation']
+  const routines = ['5 min', '10 min', '20 min']
+  return <section className="real-onboarding"><div className="real-onboarding-top"><button className="real-back-button" onClick={() => goTo('welcome')} aria-label="Back to welcome"><Icon name="back" size={17} /></button><RealBrand compact /><span className="real-step-count">{onboardingStep + 1} / 4</span></div><div className="real-step-line"><i style={{ width: `${((onboardingStep + 1) / 4) * 100}%` }} /></div>{onboardingStep === 0 && <><span className="real-eyebrow">Choose your language</span><h1>Where do you want to begin?</h1><p className="real-subtitle">Your path will be built around its script, sounds, and everyday use.</p><div className="real-choice-list">{languages.map((language) => <button key={language.name} className={`real-language-card ${selectedLanguage === language.name ? 'real-choice-selected' : ''}`} onClick={() => setSelectedLanguage(language.name)}><strong>{language.name}</strong><span>{language.native} · {language.script}</span><em>{language.note}</em><b>{selectedLanguage === language.name ? 'Selected' : 'Choose'}</b></button>)}</div></>}{onboardingStep === 1 && <><span className="real-eyebrow">Choose your reason</span><h1>What brings you here?</h1><p className="real-subtitle">The situations you care about will shape your practice.</p><div className="real-goal-list">{goals.map((goal) => <button key={goal} className={`real-goal-card ${selectedGoal === goal ? 'real-choice-selected' : ''}`} onClick={() => setSelectedGoal(goal)}><span>{goal}</span><b>{selectedGoal === goal ? 'Selected' : 'Choose'}</b></button>)}</div></>}{onboardingStep === 2 && <><span className="real-eyebrow">Choose your rhythm</span><h1>How much space do you have?</h1><p className="real-subtitle">A consistent rhythm is more useful than a perfect plan.</p><div className="real-routine-list">{routines.map((routine) => <button key={routine} className={`real-routine-card ${dailyMinutes === routine ? 'real-choice-selected' : ''}`} onClick={() => setDailyMinutes(routine)}><strong>{routine}</strong><span>{routine === '5 min' ? 'A small spark' : routine === '10 min' ? 'A steady rhythm' : 'A deeper session'}</span><b>{dailyMinutes === routine ? 'Selected' : 'Choose'}</b></button>)}</div><p className="real-helper">Every plan includes reading, writing, speaking, and review.</p></>}{onboardingStep === 3 && <><span className="real-eyebrow">Your first light</span><h1>Your path is ready.</h1><p className="real-subtitle">You can change any choice later. For now, let’s take one useful step.</p><div className="real-ready-card"><img src="/lingolume-icon.svg" alt="" /><div><span>Target language</span><strong>{selectedLanguageData.name} · {selectedLanguageData.native}</strong></div><p>{selectedGoal}</p><p>{dailyMinutes} rhythm · Read / Write / Speak</p></div></>}<button className="real-coral-button real-continue-button" onClick={continueOnboarding}>{onboardingStep === 3 ? 'Enter LingoLume' : 'Continue'} <Icon name="arrow" size={15} /></button><button className="real-text-link real-skip" onClick={() => goTo('home')}>Skip setup</button></section>
+}
+
+function RealHome({ goTo }: { goTo: (next: Screen) => void }) {
+  return <section className="real-app-page real-home"><RealAppHeader title="" goTo={goTo} /><div className="real-page-scroll"><h1 className="real-greeting">Good evening, Mara<span>.</span></h1><div className="real-continue-card"><div><small>CONTINUE LESSON · 8 MIN</small><h2>Make an introduction</h2><p>Read a greeting, write your name, and say it naturally.</p><button className="real-coral-button" onClick={() => goTo('lesson')}>Continue</button></div><div className="real-card-glow" aria-hidden="true"><span>안녕</span></div></div><div className="real-home-grid"><button className="real-mini-card" onClick={() => goTo('practice')}><strong>Review<br />Queue</strong><span>12 items</span><b>Open review</b></button><button className="real-mini-card real-rhythm-mini" onClick={() => goTo('progress')}><strong>12</strong><span>day rhythm</span><b>View progress</b></button><div className="real-skill-wheel"><div className="real-wheel-center">72<small>focus</small></div><span className="wheel-label wheel-listen">Listening</span><span className="wheel-label wheel-speak">Speaking</span><span className="wheel-label wheel-read">Reading</span><span className="wheel-label wheel-write">Writing</span></div></div><div className="real-section-label"><span>Today’s practice</span><button onClick={() => goTo('practice')}>Open all <Icon name="arrow" size={13} /></button></div><div className="real-practice-row"><button onClick={() => goTo('learn')}><span className="real-practice-icon real-icon-cyan"><Icon name="book" size={16} /></span><strong>Read</strong><small>Hiragana foundations</small></button><button onClick={() => goTo('lesson')}><span className="real-practice-icon real-icon-coral"><Icon name="pen" size={16} /></span><strong>Write</strong><small>Build a sentence</small></button><button onClick={() => goTo('practice')}><span className="real-practice-icon real-icon-violet"><Icon name="mic" size={16} /></span><strong>Speak</strong><small>Meet Nari</small></button></div></div></section>
+}
+
+function RealLearn({ selectedLanguage, setSelectedLanguage, goTo }: RealPhoneShellProps) {
+  const units = [{ n: '01', title: 'Hello, world', note: 'Script and first introductions', state: 'done' }, { n: '02', title: 'In the city', note: 'Read signs and find your way', state: 'current' }, { n: '03', title: 'Meet me there', note: 'Make plans and ask questions', state: 'next' }, { n: '04', title: 'Make it yours', note: 'Preferences and rhythm', state: 'locked' }]
+  return <section className="real-app-page"><RealAppHeader title="Learn" goTo={goTo} /><div className="real-page-scroll"><div className="real-course-title"><div><span>Learning path</span><strong>{selectedLanguage} · Beginner</strong></div><ProgressRing value={18} size={48} label="18" /></div><div className="real-language-pills">{languages.map((language) => <button key={language.name} className={selectedLanguage === language.name ? 'real-language-active' : ''} onClick={() => setSelectedLanguage(language.name)}>{language.name}</button>)}</div><h1 className="real-section-heading">From first marks<br />to real moments.</h1><div className="real-unit-list">{units.map((unit) => <button key={unit.n} className={`real-unit-card real-unit-${unit.state}`} onClick={() => unit.state === 'current' && goTo('lesson')}><span className="real-unit-number">{unit.state === 'done' ? '✓' : unit.n}</span><div><small>UNIT {unit.n} {unit.state === 'current' ? '· CURRENT' : ''}</small><strong>{unit.title}</strong><span>{unit.note}</span></div><Icon name={unit.state === 'locked' ? 'lock' : 'arrow'} size={14} /></button>)}</div><button className="real-script-lab" onClick={() => goTo('lesson')}><span><Icon name="grid" size={16} /></span><div><small>SCRIPT LAB</small><strong>Make the marks feel familiar.</strong></div><Icon name="arrow" size={15} /></button></div></section>
+}
+
+function RealLesson({ goTo, exerciseMode, setExerciseMode, lessonAnswer, answerLesson, lessonComplete, setLessonComplete }: RealPhoneShellProps) {
+  return <section className="real-app-page real-lesson"><div className="real-lesson-top"><button className="real-back-button" onClick={() => goTo('home')} aria-label="Exit lesson"><Icon name="close" size={17} /></button><div><small>MAKE AN INTRODUCTION</small><span>3 of 8</span></div><div className="real-lesson-progress"><i /></div><button className="real-text-link" onClick={() => goTo('home')}>Save</button></div><div className="real-lesson-scroll"><span className="real-eyebrow">A useful first meeting</span><h1>Which greeting fits this moment?</h1><p className="real-subtitle">Read the context, then choose the respectful greeting.</p><div className="real-skill-switch"><button className={exerciseMode === 'read' ? 'active' : ''} onClick={() => setExerciseMode('read')}>Read</button><button className={exerciseMode === 'write' ? 'active' : ''} onClick={() => setExerciseMode('write')}>Write</button><button className={exerciseMode === 'speak' ? 'active' : ''} onClick={() => setExerciseMode('speak')}>Speak</button></div>{exerciseMode === 'read' && <><div className="real-context-box"><small>THE MOMENT</small><div><span>M</span><i /> <span>N</span></div><p>You meet a new person for the first time and want to greet them politely.</p></div><div className="real-listen-row"><button aria-label="Play natural greeting audio"><Icon name="play" size={13} /></button><span>Listen to the moment<small>Natural pace · 0:03</small></span><Waveform /></div><div className="real-answer-label">Choose the best greeting</div><div className="real-answer-list">{[['greeting', '안녕하세요', 'Polite hello'], ['casual', '안녕', 'Casual hello'], ['thanks', '감사합니다', 'Thank you']].map(([value, word, label]) => <button key={value} className={lessonAnswer === value ? 'selected' : ''} onClick={() => answerLesson(value)}><strong>{word}</strong><span>{label}</span><b>{lessonAnswer === value ? 'Selected' : 'Choose'}</b></button>)}</div></>}{exerciseMode === 'write' && <div className="real-write-box"><span>WRITE IT</span><h2>Build the greeting from its parts.</h2><div className="real-writing-chips"><b>안</b><b>녕</b><b>하</b><b>세</b></div><div className="real-writing-input">안 <i /></div><small>Tap a block, then place it in order.</small></div>}{exerciseMode === 'speak' && <div className="real-speak-box"><span>SAY IT</span><h2>Greet Nari politely.</h2><div className="real-reference-word"><strong>안녕하세요</strong><button aria-label="Play reference audio"><Icon name="play" size={13} /></button></div><button className="real-record-button" onClick={() => answerLesson('spoken')}><span><Icon name="mic" size={20} /></span><strong>Press to speak</strong><small>Your microphone is off</small></button><small>Feedback prioritises intelligibility.</small></div>}{lessonAnswer && exerciseMode === 'read' && <div className={`real-feedback ${lessonAnswer === 'greeting' ? 'good' : ''}`}><strong>{lessonAnswer === 'greeting' ? 'A thoughtful choice.' : 'Take another look.'}</strong><span>{lessonAnswer === 'greeting' ? '안녕하세요 is the polite greeting for a first meeting.' : 'Think about the relationship and the setting.'}</span><button onClick={() => setLessonComplete(true)}>Continue <Icon name="arrow" size={13} /></button></div>}{lessonComplete && <div className="real-complete">Lesson step complete <button onClick={() => goTo('home')}>Back to Home</button></div>}</div></section>
+}
+
+function RealPractice({ goTo, flash, setShowPaywall }: RealPhoneShellProps) {
+  return <section className="real-app-page"><RealAppHeader title="Practise" goTo={goTo} /><div className="real-page-scroll"><div className="real-tutor-card"><small>YOUR LEARNING COMPANION</small><h1>Meet Nari.</h1><p>A patient guide who knows your current lesson and recurring mistakes.</p><div className="real-tutor-orb"><span /><span /></div><button className="real-coral-button" onClick={() => flash('Microphone practice is ready in this mockup.')}>Start speaking</button><button className="real-tutor-link" onClick={() => flash('Nari will explain the current lesson.')}>Ask for an explanation</button></div><div className="real-section-label"><span>Practice menu</span><button onClick={() => setShowPaywall(true)}>View Plus <Icon name="arrow" size={13} /></button></div><div className="real-practice-list"><button onClick={() => goTo('learn')}><Icon name="book" size={16} /><span><strong>Reading room</strong><small>See it in context</small></span><Icon name="arrow" size={13} /></button><button onClick={() => goTo('lesson')}><Icon name="pen" size={16} /><span><strong>Writing desk</strong><small>Make it yours</small></span><Icon name="arrow" size={13} /></button><button onClick={() => flash('Listening pulse queued.') }><Icon name="headphones" size={16} /><span><strong>Listening pulse</strong><small>Train your ear</small></span><Icon name="arrow" size={13} /></button></div></div></section>
+}
+
+function RealImmerse({ goTo }: RealPhoneShellProps) {
+  return <section className="real-app-page"><RealAppHeader title="Immerse" goTo={goTo} /><div className="real-page-scroll"><div className="real-immerse-hero"><div><small>FEATURED SCENARIO</small><h1>Order at<br />a café.</h1><p>Read the menu, ask one useful question, and place your order.</p><button className="real-coral-button" onClick={() => goTo('practice')}>Enter the moment <Icon name="arrow" size={13} /></button></div></div><div className="real-section-label"><span>Scenario library</span><button>All moments <Icon name="chevron" size={13} /></button></div><div className="real-scenario-list"><button onClick={() => goTo('practice')}><span className="real-scenario-art cafe" /><strong>Order at a café<small>Read · Speak · 8 min</small></strong><Icon name="arrow" size={13} /></button><button><span className="real-scenario-art station" /><strong>Find the right platform<small>Read · Ask · Soon</small></strong><Icon name="lock" size={13} /></button><button><span className="real-scenario-art friend" /><strong>Meet a new friend<small>Speak · Plan · Soon</small></strong><Icon name="lock" size={13} /></button></div></div></section>
+}
+
+function RealProgress() {
+  const skills = [['Reading', 64, 'book'], ['Writing', 42, 'pen'], ['Speaking', 51, 'mic'], ['Listening', 57, 'headphones']] as Array<[string, number, IconName]>
+  return <section className="real-app-page"><RealAppHeader title="Progress" goTo={() => undefined} /><div className="real-page-scroll"><span className="real-eyebrow">YOUR EVIDENCE</span><h1 className="real-page-title">See what is<br />becoming yours.</h1><div className="real-week-card"><span>This week</span><strong>4 useful sessions</strong><small>42 minutes · 7 tasks</small></div><div className="real-section-label"><span>Four-skill view</span><small>Growing steadily</small></div><div className="real-progress-list">{skills.map(([name, value, icon]) => <div key={name}><span className="real-progress-icon"><Icon name={icon} size={15} /></span><div><strong>{name}</strong><small>{value > 55 ? 'Getting reliable' : 'Practising'}</small><i><b style={{ width: `${value}%` }} /></i></div><em>{value}%</em></div>)}</div><div className="real-evidence-note"><span><Icon name="check" size={14} /></span><p><strong>Recent evidence</strong><small>Read a name card · Today<br />Write your introduction · Yesterday</small></p></div></div></section>
+}
+
+function RealProfile({ goTo, startOnboarding, setShowPaywall, flash }: RealPhoneShellProps) {
+  return <section className="real-app-page"><RealAppHeader title="Profile" goTo={goTo} /><div className="real-page-scroll"><div className="real-profile-head"><span>M</span><div><strong>Mara Okafor</strong><small>Beginner · Korean</small></div><b>12 day rhythm</b></div><div className="real-plan-card"><small>LINGOLUME PLUS</small><h1>More room<br />to practise.</h1><p>Deeper review, longer tutor sessions, and every guided immersion moment.</p><button className="real-coral-button" onClick={() => setShowPaywall(true)}>View your plan</button></div><div className="real-section-label"><span>Settings</span><button onClick={startOnboarding}>Replay setup</button></div><div className="real-settings-list"><button onClick={() => flash('Learning preferences are ready in this mockup.')}><Icon name="sliders" size={16} /><span>Learning preferences<small>Goals, routine, and difficulty</small></span><Icon name="chevron" size={14} /></button><button onClick={() => flash('Tutor voice is ready in this mockup.')}><Icon name="volume" size={16} /><span>Tutor voice<small>Nari · Warm and measured</small></span><Icon name="chevron" size={14} /></button><button onClick={() => flash('Downloads are ready in this mockup.')}><Icon name="download" size={16} /><span>Downloads and offline<small>2 packs ready</small></span><Icon name="chevron" size={14} /></button><button onClick={() => flash('Privacy controls are ready in this mockup.')}><Icon name="shield" size={16} /><span>Privacy and data<small>Control recordings and history</small></span><Icon name="chevron" size={14} /></button></div><button className="real-report-link" onClick={() => goTo('progress')}>View learning report <Icon name="arrow" size={13} /></button></div></section>
+}
+
+function RealPlusModal({ close }: { close: () => void }) {
+  return <div className="real-modal"><div className="real-modal-card"><button className="real-modal-close" onClick={close} aria-label="Close Plus plan"><Icon name="close" size={16} /></button><img src="/lingolume-icon.svg" alt="" /><small>LINGOLUME PLUS</small><h1>More room for the language.</h1><p>Deeper review and longer guided practice will be added after the core learning loop is validated.</p><button className="real-coral-button" onClick={close}>Keep exploring</button></div></div>
 }
 
 function WelcomeScreen({ startOnboarding, goTo }: { startOnboarding: () => void; goTo: (next: Screen) => void }) {

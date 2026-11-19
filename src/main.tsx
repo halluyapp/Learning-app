@@ -11,7 +11,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App'
 import './styles.css'
-import './exact-mockup.css'
+import './real-app.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
